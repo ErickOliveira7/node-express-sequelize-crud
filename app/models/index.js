@@ -17,3 +17,7 @@ const sequelize = new Sequelize(dbconfig.DB,dbconfig.USER,dbconfig.PASSWORD, {
 const db = {};
 db.sequelize = Sequelize;
 db.sequelize = sequelize;
+
+db.tems
+
+module,exports = db;

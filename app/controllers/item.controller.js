@@ -1,48 +1,48 @@
 const db = require("../models");
-const Item = db.Items;
+const Item = db.items;
 const Op = db.Sequelize.Op;
 
 exports.create = (req, res) => {
-    if(!req.body.name) {
+    if (!req.body.name) {
         res.status(400).send({
-            message: "O Conteúdo não pode ser vazio!"
-        })
-    return;    
+          message: "O conteúdo não pode ser vazio!"
+        });
+        return;
     }
 
     const item = {
         name: req.body.name,
         description: req.body.description,
         quantity: req.body.quantity,
-        is_flammabe: req.body.is_flammabe ? req.body.is_flammabe : false
-    }
+        isFlammable: req.body.isFlammable ? req.body.isFlammable : false
+    };
 
-    Items.create(item)
+    Item.create(item)
     .then(data => {
-        res.send(data);
+      res.send(data);
     })
     .catch(err => {
-        res.status(500).send({
-            message:
-              err.message || "Ocorreu um erro ao criar o item."
-        })
-    })
+      res.status(500).send({
+        message:
+          err.message || "Algum erro ocorreu ao tentar criar o item."
+      });
+    });
 };
 
 exports.findAll = (req, res) => {
-    const name = req.body.name;
-    var condition = name ? {name: { [Op.like]: `%${name}$` } } : null;
-
+    const name = req.query.name;
+    var condition = name ? { name: { [Op.iLike]: `%${name}%` } } : null;
+  
     Item.findAll({ where: condition })
-    .then(data => {
+      .then(data => {
         res.send(data);
-    })
-    .catch(err => {
+      })
+      .catch(err => {
         res.status(500).send({
-            message:
-              err.message || "Algum erro aconteceu ao tentar pesquisar pelos itens."
-        })
-    })
+          message:
+            err.message || "Algum erro ocorreu ao tentar pesquisar os itens."
+        });
+      });
 };
 
 exports.findOne = (req, res) => {
@@ -50,18 +50,18 @@ exports.findOne = (req, res) => {
 
     Item.findByPk(id)
       .then(data => {
-          if(data) {
-              res.send(data);
-          } else {
-              res.status(404).send({
-                  message: `Não foi possível encontrar um item com o id=${id}.`
-              });
-          }
+        if (data) {
+          res.send(data);
+        } else {
+          res.status(404).send({
+            message: `Não foi possível encontrar o item com o id=${id}.`
+          });
+        }
       })
       .catch(err => {
-          res.status(500).send({
-              message: "Ocorreu um erro ao tentar encontrar um item com o id=" + id
-          });
+        res.status(500).send({
+          message: "Algum erro ocorreu ao tentar encontrar o item com o id=" + id
+        });
       });
 };
 
@@ -69,76 +69,75 @@ exports.update = (req, res) => {
     const id = req.params.id;
 
     Item.update(req.body, {
-        where: {id: id}
+      where: { id: id }
     })
       .then(num => {
-          if(num == 1) {
-              res.send({
-                  message: "O item foi atualizado de maneira bem sucedida."
-              });
-          } else {
-              res.send({
-                  message: `Não foi possível atualizar o item com o id=${id}.`
-              });
-          }
-      })  
-      .catch(err => {
-          res.status(500).send({
-              message: "Algum erro ocorreu ao tentar atualizar o item com o id=" + id
-          })
+        if (num == 1) {
+          res.send({
+            message: "O item foi atualizado."
+          });
+        } else {
+          res.send({
+            message: `Não foi possivel atualizar o item com o id=${id}.`
+          });
+        }
       })
+      .catch(err => {
+        res.status(500).send({
+          message: "Algum erro ocorreu ao tentar atualizar o item com o id=" + id
+        });
+      });
 };
 
 exports.delete = (req, res) => {
     const id = req.params.id;
 
     Item.destroy({
-        where: {id: id}
+      where: { id: id }
     })
       .then(num => {
-          if (num == 1) {
-              res.send({
-                  message: "O item foi apagado com sucesso!"
-              });    
-          } else {
-              res.send({
-                  message: `Não foi possível apagar o item com o id=${id}.`
-              });
-          }
+        if (num == 1) {
+          res.send({
+            message: "O item foi apagado com sucesso."
+          });
+        } else {
+          res.send({
+            message: `Não foi possivel apagar o item com o id=${id}.`
+          });
+        }
       })
       .catch(err => {
-          res.status(500).send({
-              message: "Ocorreu um erro ao tentar apagar o item com o id=" + id
-          });
+        res.status(500).send({
+          message: "Algum erro ocorreu ao tentar apagar o item com o id=" + id
+        });
       });
 };
 
 exports.deleteAll = (req, res) => {
     Item.destroy({
-        where:{},
+        where: {},
         truncate: false
-    })
-      .then(nums =>{
-          res.send({message: `${nums} Itens foram apagados com sucesso.`})
       })
-      .catch(err => {
+        .then(nums => {
+          res.send({ message: `${nums} Itens foram apagados com sucesso.` });
+        })
+        .catch(err => {
           res.status(500).send({
-              message:
-                err.message || "Algum erro ocorreu ao tentar apagar todos os itens."
+            message:
+              err.message || "Algum erro ocorreu ao tentar apagar todos os itens."
           });
-      });
+        });
 };
 
-exports.findAllFlammabes = (req, res) => {
-    Item.findAll({where: { isFlammable: true} })
-    .then( data => {
-        res.send(data);
+exports.findAllFlammables = (req, res) => {
+    Item.findAll({ where: { isFlammable: true } })
+    .then(data => {
+      res.send(data);
     })
     .catch(err => {
-        res.status(500).send({
-            message:
-                err.message || "Algum erro ocorreu ao tentar pesquisar todos os itens inflamáveis."
-        })
-    })
-
+      res.status(500).send({
+        message:
+          err.message || "Algum erro ocorreu ao tentar pesquisar todos os itens inflamáveis."
+      });
+    });
 };
